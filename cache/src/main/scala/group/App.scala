@@ -1,10 +1,6 @@
 package group
 
 
-trait insertAndRemove {
-
-}
-
 case class Cache[Key, Value](cacheCapacity: Int, var cacheCurrentSize: Int, PolicyUsed: String) {
 
   var cache: List[Tuple2[Key, Value]] = List()
