@@ -5,24 +5,22 @@ trait cacheStorage[Key, Value] {
   var allElements: List[Key Tuple2 Value] = List()
 }
 
-//abstract class Insert[Key, Value](cacheCapacity: Int, cacheCurrentSize: Int, PolicyUsed: String) extends Cache[Key, Value](cacheCapacity, cacheCurrentSize, PolicyUsed) with cacheStorage[Key, Value] {
-//  def insertTuple(element: Key Tuple2 Value): Boolean = {
-//    allElements = allElements :+ element
-//    if(cache.contains(element)) {
-//      return true
-//    }
-//    if(cacheCurrentSize < cacheCapacity) {
-//      cacheCurrentSize += 1
-//      cache = element :: cache
-//      true
-//    }
-//    else {
-//      false
-//    }
-//  }
-//}
+trait cacheOperations[Key, Value] {
+  def insertTuple(element: Key Tuple2 Value): Boolean
+  def getValue(element: Key): Value
+  def remove(delElement: Key Tuple2 Value)
+}
 
-case class Cache[Key, Value](cacheCapacity: Int, var cacheCurrentSize: Int, PolicyUsed: String) extends cacheStorage[Key, Value]{
+trait evictionPolicy[Key, Value] {
+  def evictionPolicyLRU(element: Key Tuple2 Value)
+  def evictionPolicyLFU(element: Key Tuple2 Value)
+  def evictionPolicyMFU(element: Key Tuple2 Value)
+  def evictionPolicyLSL(element: Key Tuple2 Value)
+  def evictionPolicyFIFO(element: Key Tuple2 Value)
+}
+
+case class Cache[Key, Value](cacheCapacity: Int, var cacheCurrentSize: Int, PolicyUsed: String)
+  extends cacheStorage[Key, Value] with cacheOperations[Key, Value] with evictionPolicy[Key, Value]{
 
   def insert(element: Key Tuple2 Value) = {
     PolicyUsed match {
