@@ -1,10 +1,28 @@
 package group
 
-case class Cache[Key, Value](cacheCapacity: Int, var cacheCurrentSize: Int, PolicyUsed: String) {
-
+trait cacheStorage[Key, Value] {
   var cache: List[Key Tuple2 Value] = List()
   var allElements: List[Key Tuple2 Value] = List()
+}
 
+//abstract class Insert[Key, Value](cacheCapacity: Int, cacheCurrentSize: Int, PolicyUsed: String) extends Cache[Key, Value](cacheCapacity, cacheCurrentSize, PolicyUsed) with cacheStorage[Key, Value] {
+//  def insertTuple(element: Key Tuple2 Value): Boolean = {
+//    allElements = allElements :+ element
+//    if(cache.contains(element)) {
+//      return true
+//    }
+//    if(cacheCurrentSize < cacheCapacity) {
+//      cacheCurrentSize += 1
+//      cache = element :: cache
+//      true
+//    }
+//    else {
+//      false
+//    }
+//  }
+//}
+
+case class Cache[Key, Value](cacheCapacity: Int, var cacheCurrentSize: Int, PolicyUsed: String) extends cacheStorage[Key, Value]{
 
   def insert(element: Key Tuple2 Value) = {
     PolicyUsed match {
@@ -139,4 +157,3 @@ case class Cache[Key, Value](cacheCapacity: Int, var cacheCurrentSize: Int, Poli
     }
   }
 }
-

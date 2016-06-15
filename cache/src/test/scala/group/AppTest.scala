@@ -1,15 +1,13 @@
 package group
 
-import java.util
-
 import org.scalatest._
 
 class AppTest extends FlatSpec with Matchers {
 
-  "A Cache[String, String]" should "evict the least recently used element if LRU policy is used" in {
+  "A Cache" should "evict the least recently used element if LRU policy is used" in {
     val obj = Cache[String, String](2, 0, "LRU")
-    obj.insert(Tuple2("tanay", "great"))
-    obj.insert(("hello", "there"))
+    obj.insert("tanay", "great")
+    obj.insert("hello", "there")
     assert(obj.getValue("tanay") == "great")
     obj.insert("nowAdded", "newValue")
     assert(obj.getValue("tanay") == "Element not found")
