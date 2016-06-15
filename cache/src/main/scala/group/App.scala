@@ -8,7 +8,7 @@ trait cacheStorage[Key, Value] {
 trait cacheOperations[Key, Value] {
   def insertTuple(element: Key Tuple2 Value): Boolean
   def getValue(element: Key): Value
-  def remove(delElement: Key Tuple2 Value)
+  def remove(element: Key Tuple2 Value)
 }
 
 trait evictionPolicy[Key, Value] {
@@ -60,9 +60,9 @@ case class Cache[Key, Value](cacheCapacity: Int, var cacheCurrentSize: Int, Poli
     }
   }
 
-  def remove(delElement: Key Tuple2 Value) = {
-    if(cache.contains(delElement)) {
-      val tempCache = cache.filter(_ != delElement)
+  def remove(element: Key Tuple2 Value) = {
+    if(cache.contains(element)) {
+      val tempCache = cache.filter(_ != element)
       cache = tempCache
       cacheCurrentSize -= 1
     }
