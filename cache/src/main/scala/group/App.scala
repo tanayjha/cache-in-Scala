@@ -1,27 +1,26 @@
 package group
 
-
 case class Cache[Key, Value](cacheCapacity: Int, var cacheCurrentSize: Int, PolicyUsed: String) {
 
-  var cache: List[Tuple2[Key, Value]] = List()
-  var allElements: List[Tuple2[Key, Value]] = List()
+  var cache: List[Key Tuple2 Value] = List()
+  var allElements: List[Key Tuple2 Value] = List()
 
 
-  def insert(element: Tuple2[Key, Value]) = {
+  def insert(element: Key Tuple2 Value) = {
     PolicyUsed match {
-      case "LRU" => getElementPolicyLRU(element)
+      case "LRU" => evictionPolicyLRU(element)
 
-      case "LFU" => getElementPolicyLFU(element)
+      case "LFU" => evictionPolicyLFU(element)
 
-      case "MFU" => getElementPolicyMFU(element)
+      case "MFU" => evictionPolicyMFU(element)
 
-      case "LSL" => getElementPolicyLSL(element)
+      case "LSL" => evictionPolicyLSL(element)
 
-      case "FIFO" => getElementPolicyFIFO(element)
+      case "FIFO" => evictionPolicyFIFO(element)
     }
   }
 
-  def insertTuple(element: Tuple2[Key, Value]): Boolean = {
+  def insertTuple(element: Key Tuple2 Value): Boolean = {
     allElements = allElements :+ element
     if(cache.contains(element)) {
       return true
@@ -29,20 +28,23 @@ case class Cache[Key, Value](cacheCapacity: Int, var cacheCurrentSize: Int, Poli
     if(cacheCurrentSize < cacheCapacity) {
       cacheCurrentSize += 1
       cache = element :: cache
-      return true
+      true
     }
     else {
-      return false
+      false
     }
   }
 
   def getValue(element: Key): Value = {
-    if(cache.find(_._1 == element) != None)
-      return cache.find(_._1 == element).get._2
-    return "Element not found".asInstanceOf[Value]
+    if(cache.exists(_._1 == element)) {
+      cache.find(_._1 == element).get._2
+    }
+    else {
+      "Element not found".asInstanceOf[Value]
+    }
   }
 
-  def remove(delElement: Tuple2[Key, Value]) = {
+  def remove(delElement: Key Tuple2 Value) = {
     if(cache.contains(delElement)) {
       val tempCache = cache.filter(_ != delElement)
       cache = tempCache
@@ -53,115 +55,88 @@ case class Cache[Key, Value](cacheCapacity: Int, var cacheCurrentSize: Int, Poli
     }
   }
 
-  def getElementPolicyLRU(getElement: Tuple2[Key, Value]) = {
-    if(cache.contains(getElement)) {
-      remove(getElement)
-      insertTuple(getElement)
+  def evictionPolicyLRU(element: Key Tuple2 Value) = {
+    if(cache.contains(element)) {
+      remove(element)
+      insertTuple(element)
     }
     else {
       if(cacheCurrentSize < cacheCapacity) {
-        insertTuple(getElement)
+        insertTuple(element)
       }
       else {
         remove(cache.last)
-        insertTuple(getElement)
+        insertTuple(element)
       }
     }
   }
 
-  def getElementPolicyLSL(getElement: Tuple2[Key, Value]) = {
-    if(!cache.contains(getElement)) {
+  def evictionPolicyLSL(element: Key Tuple2 Value) = {
+    if(!cache.contains(element)) {
       if(cacheCurrentSize < cacheCapacity) {
-        insertTuple(getElement)
+        insertTuple(element)
       }
       else {
-        var delElement = cache(0)
-        var minVal = 1000
-        for(i <- cache.indices) {
-          if(cache(i)._1.asInstanceOf[String].length() < minVal) {
-            minVal = cache(i)._1.asInstanceOf[String].length()
-            delElement = cache(i)
-          }
-        }
+        val delElement = cache.sortBy(_._1.asInstanceOf[String].length).head
         remove(delElement)
-        insertTuple(getElement)
+        insertTuple(element)
       }
     }
     else {
-      remove(getElement)
-      insertTuple(getElement)
+      remove(element)
+      insertTuple(element)
     }
   }
 
-  def getElementPolicyLFU(getElement: Tuple2[Key, Value]) = {
-    if(!cache.contains(getElement)) {
+  def evictionPolicyLFU(element: Key Tuple2 Value) = {
+    if(!cache.contains(element)) {
       if(cacheCurrentSize < cacheCapacity) {
-        insertTuple(getElement)
+        insertTuple(element)
       }
       else {
-        var delElement = cache(0)
-        var minVal = 1000
-        for(index <- cache.indices) {
-          if(allElements.count(_ == cache(index)) < minVal) {
-            minVal = allElements.count(_ == cache(index))
-            delElement = cache(index)
-          }
-        }
+        val delElement = cache.sortBy(x => allElements.count(_ == x)).head
         remove(delElement)
-        insertTuple(getElement)
+        insertTuple(element)
       }
     }
     else {
-      remove(getElement)
-      insertTuple(getElement)
+      remove(element)
+      insertTuple(element)
     }
   }
 
-  def getElementPolicyMFU(getElement: Tuple2[Key, Value]) = {
-    if(!cache.contains(getElement)) {
+  def evictionPolicyMFU(element: Key Tuple2 Value) = {
+    if(!cache.contains(element)) {
       if(cacheCurrentSize < cacheCapacity) {
-        insertTuple(getElement)
+        insertTuple(element)
       }
       else {
-        var delElement = cache(0)
-        var maxVal = 0
-        for (index <- cache.indices) {
-          if (allElements.count(_ == cache(index)) > maxVal) {
-            maxVal = allElements.count(_ == cache(index))
-            delElement = cache(index)
-          }
-        }
+        val delElement = cache.sortBy(x => allElements.count(_ == x)).last
         remove(delElement)
-        insertTuple(getElement)
+        insertTuple(element)
       }
     }
     else {
-      remove(getElement)
-      insertTuple(getElement)
+      remove(element)
+      insertTuple(element)
     }
   }
 
-  def getElementPolicyFIFO(getElement: Tuple2[Key, Value]) = {
-    if(cache.contains(getElement)) {
-      remove(getElement)
-      insertTuple(getElement)
+  def evictionPolicyFIFO(element: Key Tuple2 Value) = {
+    if(cache.contains(element)) {
+      remove(element)
+      insertTuple(element)
     }
     else {
       if(cacheCurrentSize < cacheCapacity) {
-        insertTuple(getElement)
+        insertTuple(element)
       }
       else {
-        var delElement = cache(0)
-        for(index <- allElements.indices) {
-          if(cache.contains(allElements(index))) {
-            if(delElement == cache(0)) {
-              delElement = allElements(index)
-            }
-          }
-        }
+        val delElement = cache.sortBy(x => allElements.indexOf(x)).head
         remove(delElement)
-        insertTuple(getElement)
+        insertTuple(element)
       }
     }
   }
 }
+
